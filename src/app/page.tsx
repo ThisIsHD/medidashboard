@@ -37,7 +37,7 @@ const Home = () => {
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
               {/* Feature 1: Manage Patients */}
-              <Link href="/manage-patients">
+              <Link href="/MedicalDashboard">
               <div className="bg-gray-800 bg-opacity-70 p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-2 hover:scale-105 cursor-pointer">
                 <Image
                   src="/assets/icons/patient.png"
@@ -56,7 +56,7 @@ const Home = () => {
               </Link>
 
               {/* Feature 2: Schedule Appointments */}
-              <Link href="/schedule-appointment">
+              <Link href="/Appointment-Dashboard">
                 <div className="bg-gray-800 bg-opacity-70 p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-2 hover:scale-105 cursor-pointer">
                   <Image
                     src="/assets/icons/icons8-doctor-appointment-68.png"
@@ -74,7 +74,8 @@ const Home = () => {
                 </div>
               </Link>
 
-              {/* Feature 3: Notifications */}
+              {/* Feature 3: Clinical Operations */}
+              <Link href="/ClinicalOperations">
               <div className="bg-gray-800 bg-opacity-70 p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-2 hover:scale-105 cursor-pointer">
                 <Image
                   src="/assets/icons/notification-bell.png"
@@ -84,12 +85,34 @@ const Home = () => {
                   className="mb-4"
                 />
                 <h3 className="text-2xl font-semibold text-green-400">
-                  Notifications
+                  Clinical Operations
                 </h3>
                 <p className="mt-4 text-gray-300">
-                  Notify patients with reminders via SMS or email.
+                  Check your operation details here.
                 </p>
               </div>
+              </Link>
+
+
+               {/* Feature 4: Billing */}
+               <Link href="/BillingDashboard">
+              <div className="bg-gray-800 bg-opacity-70 p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-2 hover:scale-105 cursor-pointer">
+                <Image
+                  src="/assets/icons/notification-bell.png"
+                  alt="Notifications"
+                  width={50}
+                  height={50}
+                  className="mb-4"
+                />
+                <h3 className="text-2xl font-semibold text-green-400">
+                  Billing and Administrative
+                </h3>
+                <p className="mt-4 text-gray-300">
+                  Get your financials sorted.
+                </p>
+              </div>
+              </Link>
+
             </div>
           </div>
         </section>

@@ -1,6 +1,7 @@
-"use client"; // Mark this component as a Client Component
+"use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 interface Patient {
   id: number;
@@ -20,7 +21,9 @@ const ManagePatients: React.FC = () => {
   });
   const [editPatientId, setEditPatientId] = useState<number | null>(null);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
@@ -29,14 +32,14 @@ const ManagePatients: React.FC = () => {
     e.preventDefault();
 
     if (editPatientId !== null) {
-      // Edit existing patient
       const updatedPatients = patients.map((patient) =>
-        patient.id === editPatientId ? { ...patient, ...formData, age: Number(formData.age) } : patient
+        patient.id === editPatientId
+          ? { ...patient, ...formData, age: Number(formData.age) }
+          : patient
       );
       setPatients(updatedPatients);
       setEditPatientId(null);
     } else {
-      // Add new patient
       const newPatient = {
         id: patients.length + 1,
         name: formData.name,
@@ -47,7 +50,6 @@ const ManagePatients: React.FC = () => {
       setPatients([...patients, newPatient]);
     }
 
-    // Clear the form
     setFormData({ name: "", age: "", gender: "", condition: "" });
   };
 
@@ -76,11 +78,10 @@ const ManagePatients: React.FC = () => {
       <div className="min-h-screen bg-black bg-opacity-70">
         {/* Header Section */}
         <header className="py-12 text-center">
-          <h1 className="text-5xl font-bold text-green-400">
-            Manage Patients
-          </h1>
+          <h1 className="text-5xl font-bold text-green-400">Manage Patients</h1>
           <p className="mt-4 text-lg text-gray-200">
-            Securely add, edit, and manage patient records with ease.
+            Search, view, and update patient demographics, contact info,
+            allergies, and more.
           </p>
         </header>
 
@@ -89,16 +90,17 @@ const ManagePatients: React.FC = () => {
           <div className="container mx-auto max-w-2xl">
             <div className="bg-gray-800 bg-opacity-70 p-8 rounded-lg shadow-lg">
               <h2 className="text-3xl font-bold text-green-400 mb-6 text-center">
-                {editPatientId !== null ? "Edit Patient" : "Add New Patient"}
+                {editPatientId !== null ? "Edit Patient" : "Add / Search Patient"}
               </h2>
+
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Name Field */}
+                {/* Name or ID Field */}
                 <div>
                   <label
                     className="block text-sm font-medium text-gray-200 mb-2"
                     htmlFor="name"
                   >
-                    Name
+                    Name or Patient ID
                   </label>
                   <input
                     type="text"
@@ -107,7 +109,7 @@ const ManagePatients: React.FC = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                     className="w-full p-3 rounded-lg bg-gray-700 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Enter patient's name"
+                    placeholder="Enter name or unique patient ID to search / add new"
                     required
                   />
                 </div>
@@ -118,7 +120,7 @@ const ManagePatients: React.FC = () => {
                     className="block text-sm font-medium text-gray-200 mb-2"
                     htmlFor="age"
                   >
-                    Age
+                    Age (Demographics)
                   </label>
                   <input
                     type="number"
@@ -127,7 +129,7 @@ const ManagePatients: React.FC = () => {
                     value={formData.age}
                     onChange={handleInputChange}
                     className="w-full p-3 rounded-lg bg-gray-700 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Enter patient's age"
+                    placeholder="Enter patient age to update demographic record"
                     required
                   />
                 </div>
@@ -149,7 +151,7 @@ const ManagePatients: React.FC = () => {
                     required
                   >
                     <option value="" disabled>
-                      Select gender
+                      Select gender for demographic update
                     </option>
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
@@ -157,13 +159,13 @@ const ManagePatients: React.FC = () => {
                   </select>
                 </div>
 
-                {/* Condition Field */}
+                {/* Condition / Allergies Field */}
                 <div>
                   <label
                     className="block text-sm font-medium text-gray-200 mb-2"
                     htmlFor="condition"
                   >
-                    Condition
+                    Allergies / Medical Conditions
                   </label>
                   <input
                     type="text"
@@ -172,7 +174,7 @@ const ManagePatients: React.FC = () => {
                     value={formData.condition}
                     onChange={handleInputChange}
                     className="w-full p-3 rounded-lg bg-gray-700 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Enter patient's condition"
+                    placeholder="Add or modify allergies, chronic conditions, medications or immunization notes"
                     required
                   />
                 </div>
@@ -182,56 +184,18 @@ const ManagePatients: React.FC = () => {
                   type="submit"
                   className="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition duration-200 focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
-                  {editPatientId !== null ? "Update Patient" : "Add Patient"}
+                  {editPatientId !== null ? "Update Patient Info" : "Add / Retrieve Record"}
                 </button>
               </form>
-            </div>
-          </div>
-        </section>
 
-        {/* Patient List Section */}
-        <section className="py-8 px-6">
-          <div className="container mx-auto max-w-4xl">
-            <div className="bg-gray-800 bg-opacity-70 p-8 rounded-lg shadow-lg">
-              <h2 className="text-3xl font-bold text-green-400 mb-6 text-center">
-                Patient Records
-              </h2>
-              <div className="overflow-x-auto">
-                <table className="w-full text-gray-200">
-                  <thead>
-                    <tr className="bg-gray-700">
-                      <th className="p-3">Name</th>
-                      <th className="p-3">Age</th>
-                      <th className="p-3">Gender</th>
-                      <th className="p-3">Condition</th>
-                      <th className="p-3">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {patients.map((patient) => (
-                      <tr key={patient.id} className="border-b border-gray-700">
-                        <td className="p-3">{patient.name}</td>
-                        <td className="p-3">{patient.age}</td>
-                        <td className="p-3">{patient.gender}</td>
-                        <td className="p-3">{patient.condition}</td>
-                        <td className="p-3">
-                          <button
-                            onClick={() => handleEdit(patient)}
-                            className="bg-blue-600 text-white py-1 px-3 rounded-lg hover:bg-blue-700 transition duration-200 mr-2"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(patient.id)}
-                            className="bg-red-600 text-white py-1 px-3 rounded-lg hover:bg-red-700 transition duration-200"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              {/* Go to Dashboard link */}
+              <div className="mt-6 text-center">
+                <Link
+                  href="/MedicalDashboard"
+                  className="text-green-400 hover:underline hover:text-green-300"
+                >
+                  Go to Dashboard
+                </Link>
               </div>
             </div>
           </div>
