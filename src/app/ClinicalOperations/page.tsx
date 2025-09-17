@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Encounter {
   id: number;
@@ -32,6 +32,25 @@ export default function ClinicalDashboard() {
   });
   const [editId, setEditId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadEncounters() {
+      try {
+        const res = await fetch(
+          "https://0940f96f-112b-4714-9d4d-6dbc00e4225a.mock.pstmn.io/encounters"
+        );
+        if (!res.ok) throw new Error("Failed to fetch encounters");
+        const data = await res.json();
+        setEncounters(data.encounters || []);
+      } catch (err) {
+        console.error("Error loading encounters:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadEncounters();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -106,7 +125,6 @@ export default function ClinicalDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-8 text-gray-800">
-      {/* Header with Add Button */}
       <header className="mb-6 flex flex-col items-center justify-between gap-4 md:flex-row">
         <div>
           <h1 className="text-3xl font-bold text-green-700">
@@ -128,70 +146,72 @@ export default function ClinicalDashboard() {
         </button>
       </header>
 
-      {/* Encounter History Table */}
       <section className="mx-auto max-w-6xl rounded-lg bg-white p-6 shadow">
         <h2 className="mb-4 text-xl font-semibold text-green-700">
           Patient History & Previous Encounters
         </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border text-left">
-            <thead className="bg-green-100">
-              <tr>
-                <th className="p-3">Date</th>
-                <th className="p-3">Notes</th>
-                <th className="p-3">Vitals</th>
-                <th className="p-3">Labs / Diagnostics</th>
-                <th className="p-3">Medications</th>
-                <th className="p-3">Diagnoses</th>
-                <th className="p-3">Procedures</th>
-                <th className="p-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {encounters.map((e) => (
-                <tr key={e.id} className="border-t">
-                  <td className="p-3">{e.date}</td>
-                  <td className="p-3">{e.notes}</td>
-                  <td className="p-3">
-                    Temp: {e.vitals.temperature}
-                    <br />
-                    BP: {e.vitals.bloodPressure}
-                    <br />
-                    HR: {e.vitals.heartRate}
-                  </td>
-                  <td className="p-3">{e.labs}</td>
-                  <td className="p-3">{e.medications}</td>
-                  <td className="p-3">{e.diagnoses}</td>
-                  <td className="p-3">{e.procedures}</td>
-                  <td className="p-3 space-x-2">
-                    <button
-                      onClick={() => handleEdit(e)}
-                      className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(e.id)}
-                      className="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {encounters.length === 0 && (
+        {loading ? (
+          <div className="p-4 text-center text-gray-500">Loading...</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border text-left">
+              <thead className="bg-green-100">
                 <tr>
-                  <td colSpan={8} className="p-3 text-center text-gray-500">
-                    No encounters recorded.
-                  </td>
+                  <th className="p-3">Date</th>
+                  <th className="p-3">Notes</th>
+                  <th className="p-3">Vitals</th>
+                  <th className="p-3">Labs / Diagnostics</th>
+                  <th className="p-3">Medications</th>
+                  <th className="p-3">Diagnoses</th>
+                  <th className="p-3">Procedures</th>
+                  <th className="p-3">Actions</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {encounters.map((e) => (
+                  <tr key={e.id} className="border-t">
+                    <td className="p-3">{e.date}</td>
+                    <td className="p-3">{e.notes}</td>
+                    <td className="p-3">
+                      Temp: {e.vitals.temperature}
+                      <br />
+                      BP: {e.vitals.bloodPressure}
+                      <br />
+                      HR: {e.vitals.heartRate}
+                    </td>
+                    <td className="p-3">{e.labs}</td>
+                    <td className="p-3">{e.medications}</td>
+                    <td className="p-3">{e.diagnoses}</td>
+                    <td className="p-3">{e.procedures}</td>
+                    <td className="p-3 space-x-2">
+                      <button
+                        onClick={() => handleEdit(e)}
+                        className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(e.id)}
+                        className="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {encounters.length === 0 && (
+                  <tr>
+                    <td colSpan={8} className="p-3 text-center text-gray-500">
+                      No encounters recorded.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
-      {/* Modal for Add/Edit */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-lg">
@@ -278,7 +298,6 @@ export default function ClinicalDashboard() {
                   className="rounded border p-3"
                 />
               </div>
-
               <div className="flex justify-end gap-3 pt-2">
                 <button
                   type="button"

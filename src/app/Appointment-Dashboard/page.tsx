@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface Appointment {
   id: number;
@@ -23,9 +23,30 @@ export default function AppointmentDashboard() {
   const [editId, setEditId] = useState<number | null>(null);
   const [filterDate, setFilterDate] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadAppointments() {
+      try {
+        const res = await fetch(
+          "https://75ff56a3-57b6-486b-9e26-52232d4158bf.mock.pstmn.io/appointments"
+        );
+        if (!res.ok) throw new Error("Failed to fetch");
+        const data = await res.json();
+        setAppointments(data.appointments || []);
+      } catch (err) {
+        console.error("Error loading appointments:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadAppointments();
+  }, []);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -42,19 +63,13 @@ export default function AppointmentDashboard() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const dateTime = `${formData.date}T${formData.time}`;
-
     if (hasConflict(dateTime, formData.provider, editId ?? undefined)) {
       alert("Conflict: Provider already has an appointment at this time.");
       return;
     }
-
     if (editId !== null) {
       setAppointments((prev) =>
-        prev.map((a) =>
-          a.id === editId
-            ? { ...a, ...formData }
-            : a
-        )
+        prev.map((a) => (a.id === editId ? { ...a, ...formData } : a))
       );
       setEditId(null);
     } else {
@@ -63,7 +78,6 @@ export default function AppointmentDashboard() {
         { id: prev.length + 1, ...formData },
       ]);
     }
-
     setFormData({ date: "", time: "", patient: "", provider: "", reason: "" });
     setIsModalOpen(false);
   };
@@ -84,7 +98,6 @@ export default function AppointmentDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100 p-8 text-gray-800">
-      {/* Header with Add Button */}
       <header className="mb-6 flex flex-col items-center justify-between gap-4 md:flex-row">
         <div>
           <h1 className="text-3xl font-bold text-green-700">
@@ -96,7 +109,13 @@ export default function AppointmentDashboard() {
         </div>
         <button
           onClick={() => {
-            setFormData({ date: "", time: "", patient: "", provider: "", reason: "" });
+            setFormData({
+              date: "",
+              time: "",
+              patient: "",
+              provider: "",
+              reason: "",
+            });
             setEditId(null);
             setIsModalOpen(true);
           }}
@@ -106,7 +125,6 @@ export default function AppointmentDashboard() {
         </button>
       </header>
 
-      {/* Filter + Table Section */}
       <section className="mx-auto max-w-6xl rounded-lg bg-white p-6 shadow mb-10">
         <div className="mb-4 flex items-center gap-4">
           <label className="font-medium">Filter by Date:</label>
@@ -125,52 +143,55 @@ export default function AppointmentDashboard() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full border text-left">
-            <thead className="bg-green-100">
-              <tr>
-                <th className="p-3">Date / Time</th>
-                <th className="p-3">Patient</th>
-                <th className="p-3">Provider</th>
-                <th className="p-3">Reason</th>
-                <th className="p-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {visibleAppointments.map((a) => (
-                <tr key={a.id} className="border-t">
-                  <td className="p-3">{`${a.date} ${a.time}`}</td>
-                  <td className="p-3">{a.patient}</td>
-                  <td className="p-3">{a.provider}</td>
-                  <td className="p-3">{a.reason}</td>
-                  <td className="p-3 space-x-2">
-                    <button
-                      onClick={() => handleEdit(a)}
-                      className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(a.id)}
-                      className="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
-                    >
-                      Cancel
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {visibleAppointments.length === 0 && (
+          {loading ? (
+            <div className="p-3 text-center text-gray-500">Loading...</div>
+          ) : (
+            <table className="w-full border text-left">
+              <thead className="bg-green-100">
                 <tr>
-                  <td colSpan={5} className="p-3 text-center text-gray-500">
-                    No appointments scheduled.
-                  </td>
+                  <th className="p-3">Date / Time</th>
+                  <th className="p-3">Patient</th>
+                  <th className="p-3">Provider</th>
+                  <th className="p-3">Reason</th>
+                  <th className="p-3">Actions</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {visibleAppointments.map((a) => (
+                  <tr key={a.id} className="border-t">
+                    <td className="p-3">{`${a.date} ${a.time}`}</td>
+                    <td className="p-3">{a.patient}</td>
+                    <td className="p-3">{a.provider}</td>
+                    <td className="p-3">{a.reason}</td>
+                    <td className="p-3 space-x-2">
+                      <button
+                        onClick={() => handleEdit(a)}
+                        className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(a.id)}
+                        className="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
+                      >
+                        Cancel
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {visibleAppointments.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="p-3 text-center text-gray-500">
+                      No appointments scheduled.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
       </section>
 
-      {/* Modal for Add/Edit */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-lg">

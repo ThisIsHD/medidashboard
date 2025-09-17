@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export interface Patient {
   id: number;
@@ -20,6 +20,26 @@ export default function MedicalDashboard() {
   });
   const [editId, setEditId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  
+  useEffect(() => {
+    async function loadPatients() {
+      try {
+        const res = await fetch(
+          "https://8667c817-0619-4f3d-86d9-1e52e39e61e6.mock.pstmn.io/patients"
+        );
+        if (!res.ok) throw new Error("Failed to fetch patients");
+        const data = await res.json();
+        setPatients(data.patients);
+      } catch (err) {
+        console.error("Error loading patients:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadPatients();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -35,7 +55,6 @@ export default function MedicalDashboard() {
     e.preventDefault();
 
     if (editId !== null) {
-      // Update existing patient
       setPatients((prev) =>
         prev.map((p) =>
           p.id === editId ? { ...p, ...formData, age: Number(formData.age) } : p
@@ -43,7 +62,6 @@ export default function MedicalDashboard() {
       );
       setEditId(null);
     } else {
-      // Add new patient
       setPatients((prev) => [
         ...prev,
         {
@@ -75,6 +93,14 @@ export default function MedicalDashboard() {
     setPatients((prev) => prev.filter((p) => p.id !== id));
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen p-8 text-gray-800">
+        <p>Loading patient records…</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 p-8 text-gray-800">
       {/* Header with Add Button */}
@@ -84,7 +110,7 @@ export default function MedicalDashboard() {
             Medical Patient Dashboard
           </h1>
           <p className="text-gray-600">
-            View, add, and manage patient records.
+            View, add, and manage patient records (fetched from Postman mock API).
           </p>
         </div>
         <button

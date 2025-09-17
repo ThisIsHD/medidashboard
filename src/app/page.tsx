@@ -5,8 +5,9 @@ const Home = () => {
   return (
     <div
       className="min-h-screen bg-cover bg-center bg-no-repeat text-gray-50"
-      style={{ backgroundImage: "url('/assets/images/hospital-bg.jpg')" }}
-
+      style={{ 
+        backgroundImage: "url('/assets/images/hospital.jpg')" , 
+      }}
     >
       {/* Overlay for Full Page */}
       <div className="min-h-screen bg-black bg-opacity-70">
@@ -17,11 +18,11 @@ const Home = () => {
             <span className="text-gray-50">MedAssist</span>
           </h1>
           <p className="mt-4 text-lg text-gray-200">
-            Effortlessly manage patient records, appointments, and notifications.
+            Effortlessly manage patient records, appointments, clinical operations and billing.
           </p>
           <div className="mt-8">
             <a
-              href="#signup-section" // Anchor link to scroll to the signup section
+              href="#signup-section" 
               className="inline-block bg-green-600 text-black py-3 px-6 rounded-lg hover:bg-green-400 hover:text-gray-800 transition duration-200"
             >
               Get Started
@@ -77,13 +78,6 @@ const Home = () => {
               {/* Feature 3: Clinical Operations */}
               <Link href="/ClinicalOperations">
               <div className="bg-gray-800 bg-opacity-70 p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-2 hover:scale-105 cursor-pointer">
-                <Image
-                  src="/assets/icons/notification-bell.png"
-                  alt="Notifications"
-                  width={50}
-                  height={50}
-                  className="mb-4"
-                />
                 <h3 className="text-2xl font-semibold text-green-400">
                   Clinical Operations
                 </h3>
@@ -97,13 +91,6 @@ const Home = () => {
                {/* Feature 4: Billing */}
                <Link href="/BillingDashboard">
               <div className="bg-gray-800 bg-opacity-70 p-6 rounded-lg shadow-lg hover:shadow-xl transition duration-300 transform hover:-translate-y-2 hover:scale-105 cursor-pointer">
-                <Image
-                  src="/assets/icons/notification-bell.png"
-                  alt="Notifications"
-                  width={50}
-                  height={50}
-                  className="mb-4"
-                />
                 <h3 className="text-2xl font-semibold text-green-400">
                   Billing and Administrative
                 </h3>

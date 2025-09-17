@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface BillingRecord {
   id: number;
@@ -24,6 +24,26 @@ export default function BillingDashboard() {
   });
   const [editId, setEditId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch billing records from mock API
+  useEffect(() => {
+    async function loadRecords() {
+      try {
+        const res = await fetch(
+          "https://df4bf5f4-ace1-484f-94de-69ea13142bb4.mock.pstmn.io/billing-records"
+        );
+        if (!res.ok) throw new Error("Failed to fetch billing records");
+        const data = await res.json();
+        setRecords(data["billing-records"] || []);
+      } catch (err) {
+        console.error("Error loading billing records:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadRecords();
+  }, []);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -84,11 +104,9 @@ export default function BillingDashboard() {
     setRecords((prev) => prev.filter((r) => r.id !== id));
   };
 
-  const totalBalance = records.reduce((sum, r) => sum + r.balance, 0);
-
   return (
     <div className="min-h-screen bg-gray-100 p-8 text-gray-800">
-      {/* Header */}
+      {/* Header with Add Button */}
       <header className="mb-6 flex flex-col items-center justify-between gap-4 md:flex-row">
         <div>
           <h1 className="text-3xl font-bold text-green-700">
@@ -110,76 +128,71 @@ export default function BillingDashboard() {
         </button>
       </header>
 
-      {/* Simple Analytics */}
-      <section className="mx-auto mb-6 max-w-3xl rounded-lg bg-white p-6 shadow">
-        <h2 className="mb-4 text-xl font-semibold text-green-700">
-          Financial Snapshot
-        </h2>
-        <div className="flex justify-around text-lg font-medium text-gray-700">
-          <div>Total Patients: {records.length}</div>
-          <div>Total Balance Due: ${totalBalance.toFixed(2)}</div>
-        </div>
-      </section>
-
       {/* Records Table */}
-      <section className="mx-auto max-w-5xl rounded-lg bg-white p-6 shadow">
+      <section className="mx-auto max-w-6xl rounded-lg bg-white p-6 shadow">
         <h2 className="mb-4 text-xl font-semibold text-green-700">
           Patient Billing Records
         </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border text-left">
-            <thead className="bg-green-100">
-              <tr>
-                <th className="p-3">Patient</th>
-                <th className="p-3">Insurance</th>
-                <th className="p-3">Balance ($)</th>
-                <th className="p-3">Payments</th>
-                <th className="p-3">Billing Codes</th>
-                <th className="p-3">Fee Schedule</th>
-                <th className="p-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {records.map((r) => (
-                <tr key={r.id} className="border-t">
-                  <td className="p-3">{r.patient}</td>
-                  <td className="p-3">{r.insuranceStatus}</td>
-                  <td className="p-3">${r.balance.toFixed(2)}</td>
-                  <td className="p-3">{r.payments}</td>
-                  <td className="p-3">{r.billingCodes}</td>
-                  <td className="p-3">{r.feeSchedule}</td>
-                  <td className="p-3 space-x-2">
-                    <button
-                      onClick={() => handleEdit(r)}
-                      className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(r.id)}
-                      className="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {records.length === 0 && (
+
+        {loading ? (
+          <div className="p-4 text-center text-gray-500">Loading...</div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border text-left">
+              <thead className="bg-green-100">
                 <tr>
-                  <td colSpan={7} className="p-3 text-center text-gray-500">
-                    No billing records yet.
-                  </td>
+                  <th className="p-3">Patient</th>
+                  <th className="p-3">Insurance</th>
+                  <th className="p-3">Balance ($)</th>
+                  <th className="p-3">Payments</th>
+                  <th className="p-3">Billing Codes</th>
+                  <th className="p-3">Fee Schedule</th>
+                  <th className="p-3">Actions</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {records.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="p-3 text-center text-gray-500">
+                      No billing records found.
+                    </td>
+                  </tr>
+                ) : (
+                  records.map((r) => (
+                    <tr key={r.id} className="border-t">
+                      <td className="p-3">{r.patient}</td>
+                      <td className="p-3">{r.insuranceStatus}</td>
+                      <td className="p-3">${r.balance.toFixed(2)}</td>
+                      <td className="p-3">{r.payments}</td>
+                      <td className="p-3">{r.billingCodes}</td>
+                      <td className="p-3">{r.feeSchedule}</td>
+                      <td className="p-3 space-x-2">
+                        <button
+                          onClick={() => handleEdit(r)}
+                          className="rounded bg-blue-500 px-3 py-1 text-white hover:bg-blue-600"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(r.id)}
+                          className="rounded bg-red-500 px-3 py-1 text-white hover:bg-red-600"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
-      {/* Modal */}
+      {/* Modal for Add/Edit */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-lg rounded-lg bg-white p-6 shadow-lg">
+          <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-lg">
             <div className="mb-4 flex justify-between">
               <h2 className="text-xl font-semibold text-green-700">
                 {editId !== null ? "Edit Billing Record" : "Add Billing Record"}
